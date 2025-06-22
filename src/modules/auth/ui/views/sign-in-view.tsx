@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Loader2, OctagonAlertIcon } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,6 @@ const signInSchema = z.object({
 type SignInFormValues = z.infer<typeof signInSchema>;
 
 export const SignInView = () => {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -41,7 +40,7 @@ export const SignInView = () => {
     },
   });
 
-  const onSubmit = (data: SignInFormValues) => {
+  const onSubmitByEmail = (data: SignInFormValues) => {
     setError(null);
     setPending(true);
 
@@ -49,15 +48,36 @@ export const SignInView = () => {
       {
         email: data.email,
         password: data.password,
+        callbackURL: "/",
       },
       {
         onSuccess: () => {
           setPending(false);
-          router.push("/");
         },
         onError: ({ error }) => {
           setPending(false);
           setError("Email ou senha inválidos");
+        },
+      }
+    );
+  };
+
+  const onSubmitBySocial = (provider: "google" | "github") => {
+    setError(null);
+    setPending(true);
+
+    authClient.signIn.social(
+      {
+        provider,
+        callbackURL: "/",
+      },
+      {
+        onSuccess: () => {
+          setPending(false);
+        },
+        onError: ({ error }) => {
+          setPending(false);
+          setError(`Erro ao autenticar com o ${provider}. Tente novamente.`);
         },
       }
     );
@@ -68,7 +88,10 @@ export const SignInView = () => {
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">
+            <form
+              onSubmit={form.handleSubmit(onSubmitByEmail)}
+              className="p-6 md:p-8"
+            >
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col items-center text-center">
                   <h1 className="text-2xl font-bold">Seja bem vindo</h1>
@@ -129,16 +152,30 @@ export const SignInView = () => {
                     variant="outline"
                     disabled={pending}
                     type="button"
+                    onClick={() => onSubmitBySocial("google")}
                     className="w-full cursor-pointer"
                   >
+                    <Image
+                      src="/google-icon.svg"
+                      alt="Google"
+                      width={20}
+                      height={20}
+                    />
                     Google
                   </Button>
                   <Button
                     variant="outline"
                     disabled={pending}
                     type="button"
+                    onClick={() => onSubmitBySocial("github")}
                     className="w-full cursor-pointer"
                   >
+                    <Image
+                      src="/github-icon.svg"
+                      alt="Github"
+                      width={20}
+                      height={20}
+                    />
                     Github
                   </Button>
                 </div>
