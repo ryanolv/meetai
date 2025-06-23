@@ -62,7 +62,7 @@ export const DashboardUserButton = () => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="flex cursor-pointer items-center justify-between">
-          Billing
+          Faturas
           <CreditCardIcon className="size-4" />
         </DropdownMenuItem>
         <DropdownMenuItem
