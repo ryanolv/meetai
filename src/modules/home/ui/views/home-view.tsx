@@ -1,15 +1,15 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
+
 import { Skeleton } from "@/components/ui/skeleton";
-import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
 
-const HomeView = () => {
-  const { data: session } = authClient.useSession();
-  const router = useRouter();
+export const HomeView = () => {
+  const trpc = useTRPC();
+  const greeting = useQuery(trpc.hello.queryOptions({ text: "world" }));
 
-  if (!session) {
+  if (!greeting.data) {
     return (
       <div className="flex flex-col items-center  h-screen justify-center space-y-3">
         <Skeleton className="h-[125px] w-[250px] rounded-xl" />
@@ -21,23 +21,6 @@ const HomeView = () => {
     );
   }
   return (
-    <div className="flex flex-col p-4 gap-y-4">
-      <p>Logged in as: {session.user.name}</p>
-      <Button
-        onClick={() => {
-          authClient.signOut({
-            fetchOptions: {
-              onSuccess: () => {
-                router.push("/sign-in");
-              },
-            },
-          });
-        }}
-      >
-        Sign Out
-      </Button>
-    </div>
+    <div className="flex flex-col p-4 gap-y-4">{greeting.data.greeting}</div>
   );
 };
-
-export default HomeView;
